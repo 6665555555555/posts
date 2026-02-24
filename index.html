@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تسجيل الدخول / إنشاء حساب</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>مرحبا — الرجاء تسجيل الدخول أو إنشاء حساب</h1>
+
+    <section id="auth">
+      <div class="card" id="login-card">
+        <h2>تسجيل الدخول</h2>
+        <form id="login-form">
+          <label>اسم المستخدم أو البريد/الهاتف
+            <input type="text" id="login-identifier" required>
+          </label>
+          <label>كلمة المرور
+            <input type="password" id="login-password" required>
+          </label>
+          <button type="submit">تسجيل الدخول</button>
+        </form>
+        <p class="switch">ليس لديك حساب؟ <a href="#" id="show-register">إنشاء حساب</a></p>
+      </div>
+
+      <div class="card hidden" id="register-card">
+        <h2>إنشاء حساب</h2>
+        <form id="register-form">
+          <label>اسم المستخدم (إنجليزي، مميز)
+            <input type="text" id="reg-username" placeholder="username" required>
+          </label>
+          <label>البريد الإلكتروني أو رقم الهاتف
+            <input type="text" id="reg-contact" placeholder="email@example.com أو +123456789" required>
+          </label>
+          <label>الاسم الأول (اختياري)
+            <input type="text" id="reg-first" placeholder="الاسم الأول">
+          </label>
+          <label>الاسم الأخير (اختياري)
+            <input type="text" id="reg-last" placeholder="الاسم الأخير">
+          </label>
+          <label>كلمة المرور
+            <input type="password" id="reg-password" required>
+          </label>
+          <label>تأكيد كلمة المرور
+            <input type="password" id="reg-password-confirm" required>
+          </label>
+          <div class="note">
+            كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل، حروف صغيرة، أرقام، رموز، وطولها 8 أحرف على الأقل.
+          </div>
+          <button type="submit">إنشاء الحساب</button>
+        </form>
+        <p class="switch">لديك حساب؟ <a href="#" id="show-login">تسجيل الدخول</a></p>
+      </div>
+    </section>
+
+    <section id="dashboard" class="card hidden">
+      <div class="dash-header">
+        <div>
+          <h2 id="welcome-title">مرحبا</h2>
+          <p id="welcome-msg"></p>
+        </div>
+        <div style="text-align:left">
+          <button id="open-socials">روابط الشبكات</button>
+          <button id="logout">تسجيل الخروج</button>
+        </div>
+      </div>
+
+      <hr />
+
+      <div class="dashboard-grid">
+        <aside class="sidebar">
+          <nav>
+            <button class="side-btn active" data-filter="new">نشر منشور جديد</button>
+            <button class="side-btn" data-filter="saved">المحفوظات</button>
+            <button class="side-btn" data-filter="scheduled">قيد الانتظار</button>
+            <button class="side-btn" data-filter="published">المنشورات</button>
+          </nav>
+        </aside>
+
+        <section id="post-composer" class="main-col">
+          <h3>إنشاء منشور جديد</h3>
+          <form id="post-form">
+            <label>عنوان المنشور
+              <input type="text" id="post-title" required>
+            </label>
+            <label>محتوى المنشور
+              <div class="editor-toolbar" id="editor-toolbar">
+                <button type="button" data-cmd="bold">B</button>
+                <button type="button" data-cmd="italic">I</button>
+                <button type="button" data-cmd="underline">U</button>
+                <button type="button" data-cmd="insertUnorderedList">• List</button>
+                <button type="button" data-cmd="createLink">رابط</button>
+                <button type="button" id="toggle-preview">معاينة</button>
+              </div>
+              <div id="post-editor" class="post-editor" contenteditable="true" aria-label="محرر المحتوى"></div>
+              <div id="post-preview" class="post-preview hidden"></div>
+            </label>
+
+            <div class="row">
+              <div class="platforms" id="platforms">
+                <!-- platform buttons (JS-friendly) -->
+                <button type="button" class="platform-btn" data-platform="facebook" title="Facebook">
+                  <!-- simple SVG icon -->
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.877v-6.987H7.897v-2.89h2.541V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.772-1.63 1.563v1.875h2.773l-.443 2.89h-2.33V21.877C18.343 21.128 22 16.991 22 12z" fill="#fff"/></svg>
+                  <span>فيسبوك</span>
+                </button>
+                <button type="button" class="platform-btn" data-platform="youtube" title="YouTube">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M23.498 6.186a2.995 2.995 0 0 0-2.11-2.11C19.592 3.5 12 3.5 12 3.5s-7.592 0-9.388.576A2.995 2.995 0 0 0 .5 6.186 31.95 31.95 0 0 0 0 12a31.95 31.95 0 0 0 .5 5.814 2.995 2.995 0 0 0 2.112 2.11C4.408 20.5 12 20.5 12 20.5s7.592 0 9.388-.576a2.995 2.995 0 0 0 2.11-2.11A31.95 31.95 0 0 0 24 12a31.95 31.95 0 0 0-.502-5.814zM9.75 15.02V8.98L15.5 12l-5.75 3.02z" fill="#fff"/></svg>
+                  <span>يوتيوب</span>
+                </button>
+                <button type="button" class="platform-btn" data-platform="tiktok" title="TikTok">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 7.5a4.5 4.5 0 0 1-4.5-4.5v9.5A4.5 4.5 0 1 1 8 9.5V15a6 6 0 1 0 6-6V7.5z" fill="#fff"/></svg>
+                  <span>تيك توك</span>
+                </button>
+                <button type="button" class="platform-btn" data-platform="linkedin" title="LinkedIn">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.1c.5-.9 1.8-1.8 3.7-1.8 4 0 4.7 2.6 4.7 6V21h-4v-5.1c0-1.2 0-2.7-1.7-2.7-1.7 0-2 1.4-2 2.6V21H9z" fill="#fff"/></svg>
+                  <span>لينكدإن</span>
+                </button>
+              </div>
+
+              <div class="post-types">
+                <label><input type="radio" name="post-type" value="text" checked> نص عادي</label>
+                <label><input type="radio" name="post-type" value="media"> صور/فيديو</label>
+                <label><input type="radio" name="post-type" value="files"> ملفات/مجلدات</label>
+              </div>
+            </div>
+
+            <label>وقت النشر (اختياري — اترك فارغًا للنشر الآن)
+              <input type="datetime-local" id="post-schedule">
+            </label>
+
+            <label id="file-label" class="hidden">ملف/ملفات
+              <input type="file" id="post-files" multiple>
+            </label>
+            <div id="file-dropzone" class="hidden" style="margin-top:8px;padding:12px;border:1px dashed rgba(255,255,255,0.06);border-radius:8px;color:var(--muted);text-align:center;cursor:pointer">اسحب الملفات هنا أو اضغط لفتح المستعرض</div>
+            <div id="file-previews" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"></div>
+
+            <div class="form-actions">
+              <button type="button" id="save-draft">حفظ كمسودة</button>
+              <button type="submit">نشر / جدولة</button>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <section id="posts-area" style="margin-top:16px">
+        <h3>المنشورات المجدولة والمنشورة</h3>
+        <div id="scheduled-list"></div>
+        <div id="published-list" style="margin-top:12px"></div>
+      </section>
+
+      <!-- Social links modal-like section -->
+      <div id="socials" class="card hidden" style="margin-top:12px">
+        <h3>روابط وحسابات التواصل الاجتماعي</h3>
+        <form id="socials-form">
+          <label>فيسبوك (رابط أو اسم المستخدم)
+            <input type="text" id="social-facebook" placeholder="https://facebook.com/username">
+          </label>
+          <label>يوتيوب (قناة)
+            <input type="text" id="social-youtube" placeholder="https://youtube.com/channel/...">
+          </label>
+          <label>تيك توك
+            <input type="text" id="social-tiktok" placeholder="https://tiktok.com/@username">
+          </label>
+          <label>لينكدإن
+            <input type="text" id="social-linkedin" placeholder="https://linkedin.com/in/username">
+          </label>
+          <button type="submit">حفظ الروابط</button>
+          <button id="close-socials" style="margin-left:8px;">إغلاق</button>
+        </form>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
