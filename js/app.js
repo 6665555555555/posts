@@ -16,10 +16,149 @@
     if(view==='register'){
       registerCard.classList.remove('hidden');
       loginCard.classList.add('hidden');
+      // Animate the card
+      animateCard(registerCard);
     } else if(view==='login'){
       registerCard.classList.add('hidden');
       loginCard.classList.remove('hidden');
+      // Animate the card
+      animateCard(loginCard);
     }
+  }
+
+  function animateCard(card) {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      card.style.transition = 'all 0.3s ease';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, 50);
+  }
+
+  // Toggle password visibility
+  document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const input = document.getElementById(targetId);
+      if (input) {
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        // Update icon
+        btn.innerHTML = isPassword ? 
+          `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M1 1l22 22"/>
+            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+          </svg>` :
+          `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>`;
+      }
+    });
+  });
+
+  // Password strength indicator
+  const passwordInput = $('reg-password');
+  if (passwordInput) {
+    passwordInput.addEventListener('input', () => {
+      updatePasswordStrength(passwordInput.value);
+    });
+  }
+
+  function updatePasswordStrength(password) {
+    const strengthBar = document.querySelector('.strength-bar');
+    const strengthText = document.querySelector('.strength-text');
+
+    if (!strengthBar || !strengthText) return;
+
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[\W_]/.test(password)) strength++;
+
+    strengthBar.className = 'strength-bar';
+
+    if (strength <= 2) {
+      strengthBar.classList.add('weak');
+      strengthText.textContent = 'ضعيفة';
+      strengthText.style.color = 'var(--error)';
+    } else if (strength <= 4) {
+      strengthBar.classList.add('medium');
+      strengthText.textContent = 'متوسطة';
+      strengthText.style.color = 'var(--warning)';
+    } else {
+      strengthBar.classList.add('strong');
+      strengthText.textContent = 'قوية';
+      strengthText.style.color = 'var(--success)';
+    }
+  }
+
+  // Toast notification system
+  function showToast(type, title, message, duration = 5000) {
+    const container = $('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    const icons = {
+      success: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>`,
+      error: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>`,
+      warning: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>`,
+      info: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="16" x2="12" y2="12"/>
+        <line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>`
+    };
+
+    toast.innerHTML = `
+      ${icons[type]}
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+      <button class="toast-close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto remove after duration
+    const timeout = setTimeout(() => {
+      removeToast(toast);
+    }, duration);
+
+    // Manual close
+    toast.querySelector('.toast-close').addEventListener('click', () => {
+      clearTimeout(timeout);
+      removeToast(toast);
+    });
+  }
+
+  function removeToast(toast) {
+    toast.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
   }
 
   // Password hashing using SubtleCrypto -> SHA-256
@@ -58,23 +197,41 @@
     const pass = $('reg-password').value;
     const pass2 = $('reg-password-confirm').value;
 
-    if(!usernameValid(username)) return alert('اسم المستخدم يجب أن يكون بالإنجليزية وأحرف/أرقام/شرط سفلية فقط، طول 3-30');
-    if(!(isEmail(contact) || isPhone(contact))) return alert('الرجاء إدخال بريد إلكتروني صالح أو رقم هاتف صالح (مثال: +123456789)');
-    if(pass !== pass2) return alert('كلمتا المرور غير متطابقتين');
-    if(!passwordValid(pass)) return alert('كلمة المرور لا تفي بالشروط المطلوبة');
+    if(!usernameValid(username)) {
+      showToast('error', 'خطأ في اسم المستخدم', 'اسم المستخدم يجب أن يكون بالإنجليزية وأحرف/أرقام/شرطة سفلية فقط، طول 3-30');
+      return;
+    }
+    if(!(isEmail(contact) || isPhone(contact))) {
+      showToast('error', 'خطأ في معلومات الاتصال', 'الرجاء إدخال بريد إلكتروني صالح أو رقم هاتف صالح (مثال: +123456789)');
+      return;
+    }
+    if(pass !== pass2) {
+      showToast('error', 'خطأ في كلمة المرور', 'كلمتا المرور غير متطابقتين');
+      return;
+    }
+    if(!passwordValid(pass)) {
+      showToast('error', 'كلمة مرور ضعيفة', 'كلمة المرور لا تفي بالشروط المطلوبة. يرجى التأكد من أن كلمة المرور تحتوي على 8 أحرف على الأقل، حرف كبير، حرف صغير، رقم، ورمز خاص.');
+      return;
+    }
 
     const users = getUsers();
     // unique username
-    if(users[username]) return alert('اسم المستخدم مستخدم مسبقاً، اختر اسماً آخر');
+    if(users[username]) {
+      showToast('error', 'اسم المستخدم محجوز', 'اسم المستخدم مستخدم مسبقاً، اختر اسماً آخر');
+      return;
+    }
     // ensure contact not used
     for(const k of Object.keys(users)){
-      if(users[k].contact === contact) return alert('هذا البريد/الهاتف مستخدم لحساب آخر');
+      if(users[k].contact === contact) {
+        showToast('error', 'معلومات الاتصال محجوزة', 'هذا البريد/الهاتف مستخدم لحساب آخر');
+        return;
+      }
     }
 
     const hashed = await hashPassword(pass);
     users[username] = { username, contact, first, last, passwordHash: hashed };
     saveUsers(users);
-    alert('تم إنشاء الحساب بنجاح. يمكنك الآن تسجيل الدخول.');
+    showToast('success', 'تم إنشاء الحساب', 'تم إنشاء الحساب بنجاح. يمكنك الآن تسجيل الدخول.');
     $('register-form').reset();
     toggle('login');
   });
@@ -94,11 +251,18 @@
         if(users[k].contact === id) { user = users[k]; break; }
       }
     }
-    if(!user) return alert('المستخدم غير موجود');
+    if(!user) {
+      showToast('error', 'خطأ في تسجيل الدخول', 'المستخدم غير موجود. يرجى التحقق من اسم المستخدم أو معلومات الاتصال.');
+      return;
+    }
     const hashed = await hashPassword(pass);
-    if(hashed !== user.passwordHash) return alert('كلمة المرور غير صحيحة');
+    if(hashed !== user.passwordHash) {
+      showToast('error', 'خطأ في كلمة المرور', 'كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.');
+      return;
+    }
 
     // success
+    showToast('success', 'مرحباً بك', `تم تسجيل الدخول بنجاح. أهلاً بك ${user.first || user.username}!`);
     showWelcome(user);
     $('login-form').reset();
   });
@@ -143,6 +307,7 @@
     $('social-youtube').value = s.youtube || '';
     $('social-tiktok').value = s.tiktok || '';
     $('social-linkedin').value = s.linkedin || '';
+    $('social-instagram').value = s.instagram || '';
   }
 
   document.getElementById('open-socials').addEventListener('click', e=>{ e.preventDefault(); $('socials').classList.remove('hidden'); });
@@ -154,10 +319,11 @@
       facebook: $('social-facebook').value.trim(),
       youtube: $('social-youtube').value.trim(),
       tiktok: $('social-tiktok').value.trim(),
-      linkedin: $('social-linkedin').value.trim()
+      linkedin: $('social-linkedin').value.trim(),
+      instagram: $('social-instagram').value.trim()
     };
     saveSocials(s);
-    alert('تم حفظ روابط الشبكات الاجتماعية');
+    showToast('success', 'تم الحفظ', 'تم حفظ روابط الشبكات الاجتماعية بنجاح');
     $('socials').classList.add('hidden');
     renderSocials();
   });
@@ -166,6 +332,31 @@
   const editor = document.getElementById('post-editor');
   const preview = document.getElementById('post-preview');
   const toolbar = document.getElementById('editor-toolbar');
+  const charCount = document.getElementById('char-count');
+
+  // Character count functionality
+  if (editor && charCount) {
+    const updateCharCount = () => {
+      const text = editor.innerText || '';
+      const count = text.length;
+      charCount.textContent = count;
+
+      // Update character count styling based on limit
+      const countContainer = charCount.parentElement;
+      countContainer.classList.remove('warning', 'error');
+
+      if (count > 240) {
+        countContainer.classList.add('warning');
+      }
+      if (count > 280) {
+        countContainer.classList.add('error');
+      }
+    };
+
+    editor.addEventListener('input', updateCharCount);
+    updateCharCount(); // Initialize count
+  }
+
   if(toolbar){
     toolbar.addEventListener('click', ev=>{
       const btn = ev.target.closest('button[data-cmd]');
@@ -208,7 +399,10 @@
     const platforms = Array.from(document.querySelectorAll('.platform-btn.selected')).map(b=>b.dataset.platform);
     // consider empty if stripped text is empty
     const tempDiv = document.createElement('div'); tempDiv.innerHTML = content; const textOnly = tempDiv.textContent.trim();
-    if(!title || !textOnly) return alert('الرجاء إدخال العنوان والمحتوى');
+    if(!title || !textOnly) {
+      showToast('error', 'بيانات ناقصة', 'الرجاء إدخال العنوان والمحتوى للمنشور');
+      return;
+    }
     const posts = getPosts();
     const id = 'p_' + Date.now();
     const createdAt = new Date().toISOString();
@@ -236,7 +430,11 @@
     // reset platform selections
     document.querySelectorAll('.platform-btn.selected').forEach(b=>b.classList.remove('selected'));
     renderPosts();
-    if(post.state === 'published') alert('تم نشر المنشور محلياً'); else alert('تم جدولة المنشور');
+    if(post.state === 'published') {
+      showToast('success', 'تم النشر', 'تم نشر المنشور بنجاح على المنصات المحددة');
+    } else {
+      showToast('info', 'تم الجدولة', 'تم جدولة المنشور للنشر في الوقت المحدد');
+    }
   });
 
   // Save as draft
@@ -252,7 +450,8 @@
     const id = 'p_' + Date.now();
     const createdAt = new Date().toISOString();
     const post = { id,title,content,platforms,createdAt,scheduledAt:null,state:'saved',publishedAt:null,files,type: document.querySelector('input[name="post-type"]:checked')?.value||'text' };
-    posts.unshift(post); savePosts(posts); renderPosts(); $('post-form').reset(); document.querySelectorAll('.platform-btn.selected').forEach(b=>b.classList.remove('selected')); alert('تم حفظ المسودة');
+    posts.unshift(post); savePosts(posts); renderPosts(); $('post-form').reset(); document.querySelectorAll('.platform-btn.selected').forEach(b=>b.classList.remove('selected'));
+    showToast('success', 'تم الحفظ', 'تم حفظ المسودة بنجاح. يمكنك العودة إليها لاحقاً من قسم المحفوظات');
   });
 
   function renderPosts(){
@@ -414,7 +613,11 @@
 
   function editPost(id){
     const posts = getPosts();
-    const p = posts.find(x=>x.id===id); if(!p) return alert('المنشور غير موجود');
+    const p = posts.find(x=>x.id===id); 
+    if(!p) {
+      showToast('error', 'خطأ', 'المنشور غير موجود');
+      return;
+    }
     // populate composer for edit (simple replace)
     $('post-title').value = p.title; $('post-content').value = p.content; if(p.type) document.querySelector(`input[name="post-type"][value="${p.type}"]`).checked = true; updateFileInputVisibility();
     // select platforms
@@ -422,6 +625,7 @@
     for(const pl of p.platforms || []){ const btn = document.querySelector(`.platform-btn[data-platform="${pl}"]`); if(btn) btn.classList.add('selected'); }
     // delete original post
     deletePost(id);
+    showToast('info', 'التحرير', 'تم تحميل المنشور للتحرير. قم بإجراء التغييرات المطلوبة ثم انشر أو احفظ كمسودة');
   }
 
   function publishNow(id){
@@ -433,7 +637,7 @@
     posts[idx].scheduledAt = null;
     savePosts(posts);
     renderPosts();
-    alert('تم نشر المنشور');
+    showToast('success', 'تم النشر', 'تم نشر المنشور بنجاح على المنصات المحددة');
   }
 
   function deletePost(id){
@@ -441,6 +645,7 @@
     posts = posts.filter(p=>p.id!==id);
     savePosts(posts);
     renderPosts();
+    showToast('success', 'تم الحذف', 'تم حذف المنشور بنجاح');
   }
 
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
