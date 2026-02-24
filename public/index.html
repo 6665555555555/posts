@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة النشر التلقائي على وسائل التواصل الاجتماعي</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-share-fill"></i> منصة النشر التلقائي
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="home-link">الرئيسية</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="posts-link">المنشورات</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="schedules-link">الجدولة</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="analytics-link">التحليلات</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <button class="btn btn-outline-light me-2" id="login-btn">تسجيل الدخول</button>
+                    <button class="btn btn-light d-none" id="logout-btn">تسجيل الخروج</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="container my-4">
+        <!-- قسم المصادقة -->
+        <div id="auth-section" class="row justify-content-center">
+            <!-- نموذج تسجيل الدخول -->
+            <div id="login-form-container" class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4>تسجيل الدخول</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="login-form">
+                            <div class="mb-3">
+                                <label for="login-username" class="form-label">اسم المستخدم</label>
+                                <input type="text" class="form-control" id="login-username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="login-password" class="form-label">كلمة المرور</label>
+                                <input type="password" class="form-control" id="login-password" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">تسجيل الدخول</button>
+                            </div>
+                            <div class="text-center mt-3">
+                                <p>ليس لديك حساب؟ <a href="#" id="show-register-form">إنشاء حساب جديد</a></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- نموذج تسجيل مستخدم جديد -->
+            <div id="register-form-container" class="col-md-6 d-none">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4>إنشاء حساب جديد</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="register-form">
+                            <div class="mb-3">
+                                <label for="register-username" class="form-label">اسم المستخدم</label>
+                                <input type="text" class="form-control" id="register-username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="register-email" class="form-label">البريد الإلكتروني (اختياري)</label>
+                                <input type="email" class="form-control" id="register-email">
+                            </div>
+                            <div class="mb-3">
+                                <label for="register-password" class="form-label">كلمة المرور</label>
+                                <input type="password" class="form-control" id="register-password" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="register-confirm-password" class="form-label">تأكيد كلمة المرور</label>
+                                <input type="password" class="form-control" id="register-confirm-password" required>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="register-terms" required>
+                                    <label class="form-check-label" for="register-terms">
+                                        أوافق على <a href="#" data-bs-toggle="modal" data-bs-target="#terms-modal">الشروط والأحكام</a>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">إنشاء حساب</button>
+                            </div>
+                            <div class="text-center mt-3">
+                                <p>لديك حساب بالفعل؟ <a href="#" id="show-login-form">تسجيل الدخول</a></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- قسم لوحة التحكم -->
+        <div id="dashboard-section" class="d-none">
+            <!-- حالة الاتصال بالمنصات -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">حالة الاتصال بمنصات التواصل الاجتماعي</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <i class="bi bi-twitter text-primary fs-1"></i>
+                                            <h5 class="card-title mt-2">Twitter</h5>
+                                            <div id="twitter-status" class="badge bg-secondary">غير متصل</div>
+                                            <button class="btn btn-sm btn-outline-primary mt-2 connect-btn" data-platform="twitter">اتصال</button>
+                                            <button class="btn btn-sm btn-outline-danger mt-2 disconnect-btn d-none" data-platform="twitter">فصل الاتصال</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <i class="bi bi-facebook text-primary fs-1"></i>
+                                            <h5 class="card-title mt-2">Facebook</h5>
+                                            <div id="facebook-status" class="badge bg-secondary">غير متصل</div>
+                                            <button class="btn btn-sm btn-outline-primary mt-2 connect-btn" data-platform="facebook">اتصال</button>
+                                            <button class="btn btn-sm btn-outline-danger mt-2 disconnect-btn d-none" data-platform="facebook">فصل الاتصال</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <i class="bi bi-instagram text-danger fs-1"></i>
+                                            <h5 class="card-title mt-2">Instagram</h5>
+                                            <div id="instagram-status" class="badge bg-secondary">غير متصل</div>
+                                            <button class="btn btn-sm btn-outline-primary mt-2 connect-btn" data-platform="instagram">اتصال</button>
+                                            <button class="btn btn-sm btn-outline-danger mt-2 disconnect-btn d-none" data-platform="instagram">فصل الاتصال</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <i class="bi bi-linkedin text-info fs-1"></i>
+                                            <h5 class="card-title mt-2">LinkedIn</h5>
+                                            <div id="linkedin-status" class="badge bg-secondary">غير متصل</div>
+                                            <button class="btn btn-sm btn-outline-primary mt-2 connect-btn" data-platform="linkedin">اتصال</button>
+                                            <button class="btn btn-sm btn-outline-danger mt-2 disconnect-btn d-none" data-platform="linkedin">فصل الاتصال</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- إنشاء منشور جديد -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">إنشاء منشور جديد</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="create-post-form">
+                                <div class="mb-3">
+                                    <label for="post-content" class="form-label">محتوى المنشور</label>
+                                    <textarea class="form-control" id="post-content" rows="4" placeholder="اكتب محتوى المنشور هنا..."></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="post-image" class="form-label">صورة المنشور (اختياري)</label>
+                                    <input type="file" class="form-control" id="post-image" accept="image/*">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">اختر المنصات للنشر</label>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input platform-checkbox" type="checkbox" value="twitter" id="check-twitter">
+                                            <label class="form-check-label" for="check-twitter">
+                                                <i class="bi bi-twitter"></i> Twitter
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input platform-checkbox" type="checkbox" value="facebook" id="check-facebook">
+                                            <label class="form-check-label" for="check-facebook">
+                                                <i class="bi bi-facebook"></i> Facebook
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input platform-checkbox" type="checkbox" value="instagram" id="check-instagram">
+                                            <label class="form-check-label" for="check-instagram">
+                                                <i class="bi bi-instagram"></i> Instagram
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input platform-checkbox" type="checkbox" value="linkedin" id="check-linkedin">
+                                            <label class="form-check-label" for="check-linkedin">
+                                                <i class="bi bi-linkedin"></i> LinkedIn
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="schedule-date" class="form-label">جدولة النشر (اختياري)</label>
+                                    <input type="datetime-local" class="form-control" id="schedule-date">
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">نشر الآن</button>
+                                    <button type="button" class="btn btn-outline-primary" id="save-draft-btn">حفظ كمسودة</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قائمة المنشورات -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">المنشورات</h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-light filter-posts" data-filter="all">الكل</button>
+                                <button class="btn btn-sm btn-light filter-posts" data-filter="draft">مسودة</button>
+                                <button class="btn btn-sm btn-light filter-posts" data-filter="scheduled">مجدول</button>
+                                <button class="btn btn-sm btn-light filter-posts" data-filter="published">منشور</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="posts-container">
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">جاري التحميل...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قائمة الجداول -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">الجداول</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="schedules-container">
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">جاري التحميل...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة الاتصال بمنصة التواصل الاجتماعي -->
+    <div class="modal fade" id="connect-platform-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="connect-platform-title">اتصال بمنصة التواصل الاجتماعي</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="connect-platform-form">
+                        <input type="hidden" id="connect-platform-name">
+
+                        <div id="twitter-fields" class="platform-fields d-none">
+                            <div class="mb-3">
+                                <label for="twitter-api-key" class="form-label">API Key</label>
+                                <input type="text" class="form-control" id="twitter-api-key">
+                            </div>
+                            <div class="mb-3">
+                                <label for="twitter-api-secret" class="form-label">API Secret</label>
+                                <input type="password" class="form-control" id="twitter-api-secret">
+                            </div>
+                            <div class="mb-3">
+                                <label for="twitter-access-token" class="form-label">Access Token</label>
+                                <input type="text" class="form-control" id="twitter-access-token">
+                            </div>
+                            <div class="mb-3">
+                                <label for="twitter-access-token-secret" class="form-label">Access Token Secret</label>
+                                <input type="password" class="form-control" id="twitter-access-token-secret">
+                            </div>
+                        </div>
+
+                        <div id="facebook-fields" class="platform-fields d-none">
+                            <div class="mb-3">
+                                <label for="facebook-app-id" class="form-label">App ID</label>
+                                <input type="text" class="form-control" id="facebook-app-id">
+                            </div>
+                            <div class="mb-3">
+                                <label for="facebook-app-secret" class="form-label">App Secret</label>
+                                <input type="password" class="form-control" id="facebook-app-secret">
+                            </div>
+                            <div class="mb-3">
+                                <label for="facebook-access-token" class="form-label">Access Token</label>
+                                <input type="text" class="form-control" id="facebook-access-token">
+                            </div>
+                        </div>
+
+                        <div id="instagram-fields" class="platform-fields d-none">
+                            <div class="mb-3">
+                                <label for="instagram-app-id" class="form-label">App ID</label>
+                                <input type="text" class="form-control" id="instagram-app-id">
+                            </div>
+                            <div class="mb-3">
+                                <label for="instagram-app-secret" class="form-label">App Secret</label>
+                                <input type="password" class="form-control" id="instagram-app-secret">
+                            </div>
+                            <div class="mb-3">
+                                <label for="instagram-access-token" class="form-label">Access Token</label>
+                                <input type="text" class="form-control" id="instagram-access-token">
+                            </div>
+                        </div>
+
+                        <div id="linkedin-fields" class="platform-fields d-none">
+                            <div class="mb-3">
+                                <label for="linkedin-client-id" class="form-label">Client ID</label>
+                                <input type="text" class="form-control" id="linkedin-client-id">
+                            </div>
+                            <div class="mb-3">
+                                <label for="linkedin-client-secret" class="form-label">Client Secret</label>
+                                <input type="password" class="form-control" id="linkedin-client-secret">
+                            </div>
+                            <div class="mb-3">
+                                <label for="linkedin-access-token" class="form-label">Access Token</label>
+                                <input type="text" class="form-control" id="linkedin-access-token">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" id="save-platform-connection">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تعديل منشور -->
+    <div class="modal fade" id="edit-post-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تعديل منشور</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-post-form">
+                        <input type="hidden" id="edit-post-id">
+                        <div class="mb-3">
+                            <label for="edit-post-content" class="form-label">محتوى المنشور</label>
+                            <textarea class="form-control" id="edit-post-content" rows="4"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">اختر المنصات للنشر</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input edit-platform-checkbox" type="checkbox" value="twitter" id="edit-check-twitter">
+                                    <label class="form-check-label" for="edit-check-twitter">
+                                        <i class="bi bi-twitter"></i> Twitter
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input edit-platform-checkbox" type="checkbox" value="facebook" id="edit-check-facebook">
+                                    <label class="form-check-label" for="edit-check-facebook">
+                                        <i class="bi bi-facebook"></i> Facebook
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input edit-platform-checkbox" type="checkbox" value="instagram" id="edit-check-instagram">
+                                    <label class="form-check-label" for="edit-check-instagram">
+                                        <i class="bi bi-instagram"></i> Instagram
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input edit-platform-checkbox" type="checkbox" value="linkedin" id="edit-check-linkedin">
+                                    <label class="form-check-label" for="edit-check-linkedin">
+                                        <i class="bi bi-linkedin"></i> LinkedIn
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-schedule-date" class="form-label">جدولة النشر (اختياري)</label>
+                            <input type="datetime-local" class="form-control" id="edit-schedule-date">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" id="save-post-changes">حفظ التغييرات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إنشاء جدولة -->
+    <div class="modal fade" id="create-schedule-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إنشاء جدولة جديدة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="create-schedule-form">
+                        <div class="mb-3">
+                            <label for="schedule-post-select" class="form-label">اختر منشور</label>
+                            <select class="form-select" id="schedule-post-select">
+                                <option value="">اختر منشور...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="schedule-cron" class="form-label">تعبير Cron</label>
+                            <input type="text" class="form-control" id="schedule-cron" placeholder="مثال: 0 9 * * * (كل يوم الساعة 9 صباحاً)">
+                            <div class="form-text">استخدم هذا الموقع لمساعدتك في إنشاء تعبير Cron: <a href="https://crontab.guru/" target="_blank">crontab.guru</a></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">اختر المنصات</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input schedule-platform-checkbox" type="checkbox" value="twitter" id="schedule-check-twitter">
+                                    <label class="form-check-label" for="schedule-check-twitter">
+                                        <i class="bi bi-twitter"></i> Twitter
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input schedule-platform-checkbox" type="checkbox" value="facebook" id="schedule-check-facebook">
+                                    <label class="form-check-label" for="schedule-check-facebook">
+                                        <i class="bi bi-facebook"></i> Facebook
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input schedule-platform-checkbox" type="checkbox" value="instagram" id="schedule-check-instagram">
+                                    <label class="form-check-label" for="schedule-check-instagram">
+                                        <i class="bi bi-instagram"></i> Instagram
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input schedule-platform-checkbox" type="checkbox" value="linkedin" id="schedule-check-linkedin">
+                                    <label class="form-check-label" for="schedule-check-linkedin">
+                                        <i class="bi bi-linkedin"></i> LinkedIn
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" id="save-schedule">حفظ الجدولة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- رسائل التنبيه -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="success-toast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="success-toast-message">
+                    تمت العملية بنجاح
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        <div id="error-toast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="error-toast-message">
+                    حدث خطأ
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة منبثقة للشروط والأحكام -->
+    <div class="modal fade" id="terms-modal" tabindex="-1" aria-labelledby="terms-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="terms-modal-label">الشروط والأحكام</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>1. قبول الشروط</h6>
+                    <p>بإنشاء حسابك في منصة النشر التلقائي، أنت توافق على الالتزام بهذه الشروط والأحكام.</p>
+
+                    <h6>2. استخدام المنصة</h6>
+                    <p>تتعهد باستخدام هذه المنصة للأغراض المشروعة فقط وعدم نشر أي محتوى غير قانوني أو مسيء.</p>
+
+                    <h6>3. المحتوى المنشور</h6>
+                    <p>أنت مسؤول بشكل كامل عن أي محتوى تنشره عبر هذه المنصة، ونحن لا نتحمل أي مسؤولية عن هذا المحتوى.</p>
+
+                    <h6>4. الخصوصية</h6>
+                    <p>نحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية وفقًا لسياسة الخصوصية الخاصة بنا.</p>
+
+                    <h6>5. حسابات منصات التواصل الاجتماعي</h6>
+                    <p>أنت مسؤول عن الحفاظ على أمان حساباتك على منصات التواصل الاجتماعي وعدم مشاركة بيانات الدخول مع أي طرف ثالث.</p>
+
+                    <h6>6. التعديلات</h6>
+                    <p>نحتفظ بالحق في تعديل هذه الشروط والأحكام في أي وقت، وسيتم إشعارك بأي تغييرات مهمة.</p>
+
+                    <h6>7. إلغاء الحساب</h6>
+                    <p>يمكنك إلغاء حسابك في أي وقت، وسيتم حذف بياناتك الشخصية من قاعدة البيانات.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
