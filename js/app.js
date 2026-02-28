@@ -214,6 +214,31 @@
       return;
     }
 
+    // Try to register via API first
+    try {
+      if (typeof api !== 'undefined' && api.register) {
+        const response = await api.register({
+          username,
+          contact,
+          firstName: first,
+          lastName: last,
+          password: pass
+        });
+
+        if (response && response.token) {
+          api.setToken(response.token);
+          showToast('success', 'تم إنشاء الحساب', 'تم إنشاء الحساب بنجاح. يمكنك الآن تسجيل الدخول.');
+          $('register-form').reset();
+          toggle('login');
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('API registration error:', error);
+      // Fall back to local registration
+    }
+
+    // Local registration fallback
     const users = getUsers();
     // unique username
     if(users[username]) {
@@ -241,6 +266,25 @@
     e.preventDefault();
     const id = $('login-identifier').value.trim();
     const pass = $('login-password').value;
+
+    // Try to login via API first
+    try {
+      if (typeof api !== 'undefined' && api.login) {
+        const response = await api.login(id, pass);
+        if (response && response.token) {
+          api.setToken(response.token);
+          showToast('success', 'مرحباً بك', `تم تسجيل الدخول بنجاح. أهلاً بك ${response.user.first || response.user.username}!`);
+          showWelcome(response.user);
+          $('login-form').reset();
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('API login error:', error);
+      // Fall back to local authentication
+    }
+
+    // Local authentication fallback
     const users = getUsers();
 
     // find user by username or contact
@@ -267,7 +311,7 @@
     $('login-form').reset();
   });
 
-  function showWelcome(user){
+  async function showWelcome(user){
     $('welcome-title').textContent = `مرحبا ${user.first || user.username}`;
     const contactLine = user.contact ? `البريد/الهاتف: ${user.contact}` : '';
     $('welcome-msg').textContent = contactLine;
@@ -276,14 +320,25 @@
     if(dashboard){
       dashboard.classList.remove('hidden');
       $('auth').classList.add('hidden');
-      renderDashboard();
+      await renderDashboard();
     } else {
       welcome.classList.remove('hidden');
       $('auth').classList.add('hidden');
     }
   }
 
-  function doLogout(){
+  async function doLogout(){
+    // Try to logout via API first
+    try {
+      if (typeof api !== 'undefined' && api.logout) {
+        await api.logout();
+      }
+    } catch (error) {
+      console.error('API logout error:', error);
+      // Continue with local logout even if API fails
+    }
+
+    // Local logout
     const dashboard = $('dashboard');
     if(dashboard) dashboard.classList.add('hidden');
     $('auth').classList.remove('hidden');
@@ -296,12 +351,26 @@
   function getSocials(){ try{ return JSON.parse(localStorage.getItem('socials')||'{}') }catch(e){return {}} }
   function saveSocials(s){ localStorage.setItem('socials', JSON.stringify(s)) }
 
-  function renderDashboard(){
-    renderSocials();
-    renderPosts();
+  async function renderDashboard(){
+    await renderSocials();
+    await renderPosts();
   }
 
-  function renderSocials(){
+  async function renderSocials(){
+    // First, try to get social links from API
+    try {
+      if (typeof api !== 'undefined' && api.getSocialLinks) {
+        const apiSocials = await api.getSocialLinks();
+        if (apiSocials) {
+          saveSocials(apiSocials);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching social links from API:', error);
+      // Fall back to localStorage if API fails
+    }
+
+    // Display social links from localStorage
     const s = getSocials();
     $('social-facebook').value = s.facebook || '';
     $('social-youtube').value = s.youtube || '';
@@ -313,7 +382,7 @@
   document.getElementById('open-socials').addEventListener('click', e=>{ e.preventDefault(); $('socials').classList.remove('hidden'); });
   document.getElementById('close-socials').addEventListener('click', e=>{ e.preventDefault(); $('socials').classList.add('hidden'); });
 
-  document.getElementById('socials-form').addEventListener('submit', e=>{
+  document.getElementById('socials-form').addEventListener('submit', async e=>{
     e.preventDefault();
     const s = {
       facebook: $('social-facebook').value.trim(),
@@ -322,8 +391,23 @@
       linkedin: $('social-linkedin').value.trim(),
       instagram: $('social-instagram').value.trim()
     };
+
+    // Save to localStorage
     saveSocials(s);
-    showToast('success', 'تم الحفظ', 'تم حفظ روابط الشبكات الاجتماعية بنجاح');
+
+    // Also try to save to API if available
+    try {
+      if (typeof api !== 'undefined' && api.saveSocialLinks) {
+        await api.saveSocialLinks(s);
+        showToast('success', 'تم الحفظ', 'تم حفظ روابط الشبكات الاجتماعية بنجاح على الخادم');
+      } else {
+        showToast('success', 'تم الحفظ', 'تم حفظ روابط الشبكات الاجتماعية محلياً');
+      }
+    } catch (error) {
+      console.error('Error saving social links to API:', error);
+      showToast('warning', 'تنبيه', 'تم الحفظ محلياً فقط. لم يتم الاتصال بالخادم.');
+    }
+
     $('socials').classList.add('hidden');
     renderSocials();
   });
@@ -390,7 +474,7 @@
     });
   }
 
-  document.getElementById('post-form').addEventListener('submit', e=>{
+  document.getElementById('post-form').addEventListener('submit', async e=>{
     e.preventDefault();
     const title = $('post-title').value.trim();
     const content = (document.getElementById('post-editor')?.innerHTML || '').trim();
@@ -403,8 +487,48 @@
       showToast('error', 'بيانات ناقصة', 'الرجاء إدخال العنوان والمحتوى للمنشور');
       return;
     }
+
+    // Try to post via API first
+    let apiPostId = null;
+    try {
+      if (typeof api !== 'undefined' && (api.createPost || api.schedulePost)) {
+        // files (if any)
+        const filesInput = document.getElementById('post-files');
+        const files = [];
+        if(filesInput && filesInput.files.length){
+          for(const f of filesInput.files){ files.push({name:f.name,size:f.size,type:f.type}) }
+        }
+        // post type
+        const typeEl = document.querySelector('input[name="post-type"]:checked');
+        const ptype = typeEl? typeEl.value : 'text';
+
+        const postData = {
+          title,
+          content,
+          platforms,
+          type: ptype,
+          files
+        };
+
+        if(schedule){
+          const scheduledAt = new Date(schedule).toISOString();
+          if(new Date(scheduledAt) > new Date()) {
+            const response = await api.schedulePost(postData, scheduledAt);
+            apiPostId = response.id;
+          }
+        } else {
+          const response = await api.createPost(postData);
+          apiPostId = response.id;
+        }
+      }
+    } catch (error) {
+      console.error('API post error:', error);
+      // Fall back to local posting
+    }
+
+    // Local posting
     const posts = getPosts();
-    const id = 'p_' + Date.now();
+    const id = apiPostId || 'p_' + Date.now();
     const createdAt = new Date().toISOString();
     let state = 'published';
     let scheduledAt = null;
@@ -438,7 +562,7 @@
   });
 
   // Save as draft
-  document.getElementById('save-draft').addEventListener('click', e=>{
+  document.getElementById('save-draft').addEventListener('click', async e=>{
     e.preventDefault();
     const title = $('post-title').value.trim();
     const content = (document.getElementById('post-editor')?.innerHTML || '').trim();
@@ -446,16 +570,87 @@
     const filesInput = document.getElementById('post-files');
     const files = [];
     if(filesInput && filesInput.files.length){ for(const f of filesInput.files){ files.push({name:f.name,size:f.size,type:f.type}) } }
+
+    // Try to save draft via API first
+    let apiDraftId = null;
+    try {
+      if (typeof api !== 'undefined' && api.saveDraft) {
+        const typeEl = document.querySelector('input[name="post-type"]:checked');
+        const ptype = typeEl? typeEl.value : 'text';
+
+        const response = await api.saveDraft({
+          title,
+          content,
+          platforms,
+          type: ptype,
+          files
+        });
+
+        if (response && response.id) {
+          apiDraftId = response.id;
+        }
+      }
+    } catch (error) {
+      console.error('API save draft error:', error);
+      // Fall back to local saving
+    }
+
+    // Local saving
     const posts = getPosts();
-    const id = 'p_' + Date.now();
+    const id = apiDraftId || 'p_' + Date.now();
     const createdAt = new Date().toISOString();
     const post = { id,title,content,platforms,createdAt,scheduledAt:null,state:'saved',publishedAt:null,files,type: document.querySelector('input[name="post-type"]:checked')?.value||'text' };
     posts.unshift(post); savePosts(posts); renderPosts(); $('post-form').reset(); document.querySelectorAll('.platform-btn.selected').forEach(b=>b.classList.remove('selected'));
     showToast('success', 'تم الحفظ', 'تم حفظ المسودة بنجاح. يمكنك العودة إليها لاحقاً من قسم المحفوظات');
   });
 
-  function renderPosts(){
-    const posts = getPosts();
+  async function renderPosts(){
+    let posts = getPosts();
+
+    // Try to fetch posts from API first
+    try {
+      if (typeof api !== 'undefined' && api.getPosts) {
+        const apiPosts = await api.getPosts();
+        if (apiPosts && (apiPosts.saved || apiPosts.scheduled || apiPosts.published)) {
+          // Merge API posts with local posts
+          const allPosts = [
+            ...(apiPosts.saved || []).map(p => ({...p, state: 'saved'})),
+            ...(apiPosts.scheduled || []).map(p => ({...p, state: 'scheduled'})),
+            ...(apiPosts.published || []).map(p => ({...p, state: 'published'}))
+          ];
+
+          // Update local posts with API data
+          const localPosts = getPosts();
+          const mergedPosts = [...allPosts];
+
+          // Add local posts that don't exist in API
+          allPosts.forEach(apiPost => {
+            const existsInLocal = localPosts.some(localPost => localPost.id === apiPost.id);
+            if (!existsInLocal) {
+              mergedPosts.push(apiPost);
+            }
+          });
+
+          // Add local posts that don't exist in API
+          localPosts.forEach(localPost => {
+            const existsInApi = allPosts.some(apiPost => apiPost.id === localPost.id);
+            if (!existsInApi) {
+              mergedPosts.push(localPost);
+            }
+          });
+
+          // Sort by creation date (newest first)
+          mergedPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+          posts = mergedPosts;
+          savePosts(posts);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching posts from API:', error);
+      // Fall back to local posts
+    }
+
     // apply sidebar filter if set
     const activeFilter = document.querySelector('.side-btn.active')?.dataset.filter || 'new';
     const scheduled = posts.filter(p=>p.state==='scheduled');
@@ -510,7 +705,7 @@
   }
 
   // sidebar buttons
-  document.querySelectorAll('.side-btn').forEach(b=> b.addEventListener('click', ev=>{
+  document.querySelectorAll('.side-btn').forEach(b=> b.addEventListener('click', async ev=>{
     document.querySelectorAll('.side-btn').forEach(x=>x.classList.remove('active'));
     ev.currentTarget.classList.add('active');
     const filter = ev.currentTarget.dataset.filter;
@@ -521,7 +716,7 @@
     if(filter === 'new'){
       composer.scrollIntoView({behavior:'smooth'});
     }
-    renderPosts();
+    await renderPosts();
   }));
 
   // platform button toggle
@@ -628,7 +823,28 @@
     showToast('info', 'التحرير', 'تم تحميل المنشور للتحرير. قم بإجراء التغييرات المطلوبة ثم انشر أو احفظ كمسودة');
   }
 
-  function publishNow(id){
+  async function publishNow(id){
+    // Try to publish via API first
+    try {
+      if (typeof api !== 'undefined' && api.createPost) {
+        const posts = getPosts();
+        const post = posts.find(p=>p.id===id);
+        if(post) {
+          await api.createPost({
+            title: post.title,
+            content: post.content,
+            platforms: post.platforms,
+            type: post.type,
+            files: post.files
+          });
+        }
+      }
+    } catch (error) {
+      console.error('API publish now error:', error);
+      // Fall back to local publishing
+    }
+
+    // Local publishing
     const posts = getPosts();
     const idx = posts.findIndex(p=>p.id===id);
     if(idx===-1) return;
@@ -640,7 +856,18 @@
     showToast('success', 'تم النشر', 'تم نشر المنشور بنجاح على المنصات المحددة');
   }
 
-  function deletePost(id){
+  async function deletePost(id){
+    // Try to delete via API first
+    try {
+      if (typeof api !== 'undefined' && api.deletePost) {
+        await api.deletePost(id);
+      }
+    } catch (error) {
+      console.error('API delete post error:', error);
+      // Continue with local deletion even if API fails
+    }
+
+    // Local deletion
     let posts = getPosts();
     posts = posts.filter(p=>p.id!==id);
     savePosts(posts);
@@ -651,7 +878,7 @@
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
 
   // background scheduler: check every 5 seconds (demo). In production use server-side scheduling.
-  setInterval(()=>{
+  setInterval(async ()=>{
     const posts = getPosts();
     let changed = false;
     const now = new Date();
@@ -662,7 +889,7 @@
         }
       }
     }
-    if(changed) { savePosts(posts); renderPosts(); }
+    if(changed) { savePosts(posts); await renderPosts(); }
   }, 5000);
 
   });
